@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.tarefa.domain.Tidy;
+import br.com.tarefa.exceptions.ObjectNotFoundException;
 import br.com.tarefa.repository.TidyRepository;
 
 @Service
@@ -22,7 +23,8 @@ public class TidyService {
 
 	public Tidy findById(Integer id) {
 		Optional<Tidy> obj = repo.findById(id);
-		return obj.orElse(null);
+		return obj.orElseThrow(() -> new ObjectNotFoundException("Objeto Não encontrado!" + 
+					id + ", tipo: " + Tidy.class.getName(), null));
 	}
 
 	public List<Tidy> listOpen() {
@@ -30,9 +32,27 @@ public class TidyService {
 		return list;
 	}
 
-	public List<Tidy> listOpenEnd() {
+	public List<Tidy> listClose() {
 		List<Tidy> list = repo.findAllClose();
 		return list;
+	}
+	
+	public Tidy create(Tidy obj) {
+		obj.setId(null);
+		return repo.save(obj);
+	}
+	
+	public void delete(Integer id) {
+		repo.deleteById(id);
+	}
+
+	public Tidy update(Integer id, Tidy obj) {
+		Tidy newObj = findById(id);
+		newObj.setTitulo(obj.getTitulo());
+		newObj.setDescricao(obj.getDescricao());
+		newObj.setDate(obj.getDate());
+		newObj.setFinalizado(obj.getFinalizado());
+		return repo.save(newObj);
 	}
 
 }
